@@ -1,40 +1,25 @@
-// mapboxgl.accessToken = mapToken;
+// Needs Leaflet (L) loaded in boilerplate.ejs. Listing data comes from the #map element's data-listing attribute.
+const mapEl = document.getElementById("map");
 
-// const map = new mapboxgl.Map({
-//     container: 'map', // container ID
-//     style: 'mapbox://styles/mapbox/streets-v12', // style URL
-//     center: coordinates, // starting position [lng, lat]
-//     zoom: 9 // starting zoom
-// });
+if (mapEl && mapEl.dataset.listing) {
+  const listingData = JSON.parse(mapEl.dataset.listing);
 
-// const marker = new mapboxgl.Marker({ color: "red" })
-//     .setLngLat(listing.geometry.coordinates)
-//     .setPopup(
-//         new mapboxgl.Popup({ offset: 25 }).setHTML(
-//          `<h4>${listing.location}</h4><p>Exact Location will be provided after booking</p>`
-//         )
-//     )
-//     .addTo(map);
+  if (listingData.geometry && listingData.geometry.coordinates) {
+    const [lng, lat] = listingData.geometry.coordinates;
+    const map = L.map("map").setView([lat, lng], 10);
 
-if (listingData.geometry && listingData.geometry.coordinates) {
-  const map = L.map('map').setView(
-    [listingData.geometry.coordinates[1], listingData.geometry.coordinates[0]],
-    10
-  );
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "&copy; OpenStreetMap contributors",
+    }).addTo(map);
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
-  }).addTo(map);
+    // Build popup with textContent so listing text can't inject HTML
+    const popupEl = document.createElement("div");
+    const title = document.createElement("b");
+    title.textContent = listingData.title;
+    popupEl.append(title, document.createElement("br"), document.createTextNode(listingData.location));
 
-  L.marker([
-    listingData.geometry.coordinates[1],
-    listingData.geometry.coordinates[0]
-  ])
-    .addTo(map)
-    .bindPopup(`${listingData.title} <br> ${listingData.location}`)
-    .openPopup();
-} else {
-  console.warn("No geometry found for this listing");
+    L.marker([lat, lng]).addTo(map).bindPopup(popupEl).openPopup();
+  } else {
+    console.warn("No geometry found for this listing");
+  }
 }
-
-

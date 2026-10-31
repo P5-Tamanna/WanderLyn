@@ -50,7 +50,7 @@ const store = MongoStore.create({
     touchAfter: 24 * 3600,
 });
 
-store.on("error", () => {
+store.on("error", (err) => {
     console.log("ERROR in MONGO SESSION STORE", err);
 });
 
@@ -85,7 +85,8 @@ passport.deserializeUser(User.deserializeUser());
 app.use((req, res, next) => { //flash middleware define
     res.locals.success = req.flash("success");
     res.locals.error = req.flash("error");
-    res.locals.currUser = req.user;
+    res.locals.currUser = req.user || null;
+    console.log(req.method, req.originalUrl, "-> user:", req.user ? req.user.username : "none"); // TEMPORARY: remove later
     next();
 });
 
@@ -124,10 +125,11 @@ app.all("/{*any}", (req, res, next) => {
 // Error Handling
 app.use((err, req, res, next) => {
     let { statusCode = 500, message = "Something went wrong!" } = err;
-    res.status(statusCode).render("error.ejs", { message });
+    res.status(statusCode).render("error.ejs", { message, currUser: req.user || null, success: [], error: [] });
     // res.status(statusCode).send(message);
 });
 
-app.listen(8080, () => {
-    console.log("server is listening to port 8080");
-});  
+const port = process.env.PORT || 8080;
+app.listen(port, () => {
+    console.log(`server is listening on port ${port}`);
+});
