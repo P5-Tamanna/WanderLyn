@@ -88,6 +88,12 @@ middleware.js  Auth, ownership and validation middleware
 schema.js      Joi validation schemas
 ```
 
+## Screenshots
+
+![Home page](screenshots/home.png)
+![Listing page with map](screenshots/listing.png)
+![Reviews](screenshots/reviews.png)
+
 ## Routes
 
 | Method | Path | Description |
